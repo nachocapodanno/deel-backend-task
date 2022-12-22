@@ -1,6 +1,7 @@
-const { Profile, Contract, Job } = require('../src/model');
+const { Profile, Contract, Job } = require('../src/models');
 
 /* WARNING THIS WILL DROP THE CURRENT DATABASE */
+// eslint-disable-next-line no-use-before-define
 seed();
 
 async function seed() {
@@ -8,7 +9,7 @@ async function seed() {
   await Profile.sync({ force: true });
   await Contract.sync({ force: true });
   await Job.sync({ force: true });
-  //insert data
+  // insert data
   await Promise.all([
    Profile.create({
       id: 1,
