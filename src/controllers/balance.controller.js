@@ -5,11 +5,15 @@ exports.depositMoney = async (req, res) => {
   try {
     const result = await sequelize.transaction(async (t) => {
       const { Job, Contract, Profile } = req.app.get("models");
-      const {amount} = req.body;
+      const { amount } = req.body;
       const { userId } = req.params;
       const originClient = req.profile;
 
-      const { type, balance: originClientBalance, id: originClientId } = originClient;
+      const {
+        type,
+        balance: originClientBalance,
+        id: originClientId,
+      } = originClient;
 
       if (type !== "client")
         return res.status(400).json({ error: "Profile is not a client" }).end();
@@ -38,27 +42,27 @@ exports.depositMoney = async (req, res) => {
         },
       });
 
-      const quarterJobsToPay = ((totalJobsToPay * 25) / 100).toFixed(2)
+      const quarterJobsToPay = ((totalJobsToPay * 25) / 100).toFixed(2);
 
-      if (amount > quarterJobsToPay || amount < 0 || originClientBalance < amount) {
+      if (
+        amount > quarterJobsToPay ||
+        amount < 0 ||
+        originClientBalance < amount
+      ) {
         return res.status(400).json({ error: "Invalid client amount" }).end();
       }
 
-      try {
-        const { balance: clientToDepositBalance } = clientToDeposit;
+      const { balance: clientToDepositBalance } = clientToDeposit;
 
-        await clientToDeposit.update(
-          { balance: clientToDepositBalance + amount },
-          { transaction: t }
-        );
+      await clientToDeposit.update(
+        { balance: clientToDepositBalance + amount },
+        { transaction: t }
+      );
 
-        await originClient.update(
-          { balance: originClientBalance - amount },
-          { transaction: t }
-        );
-      } catch (error) {
-        throw new Error("Error paying for a job");
-      }
+      await originClient.update(
+        { balance: originClientBalance - amount },
+        { transaction: t }
+      );
 
       return res.json({ message: "Deposit done" }).end();
     });
